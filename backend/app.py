@@ -37,33 +37,61 @@ def generate_news():
     { type: "...", location: "..." }
     Returns JSON: { excerpt: "1-sentence teaser…" }
     """
+    print("🔔 generate_news hit with:", request.get_json())
     data       = request.get_json()
     event_type = data.get("type")
     location   = data.get("location")
 
     api_key = os.getenv("GOOGLE_GEMINI_API_KEY")
-    url     = "https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage"
+    
+    # Correct Gemini API endpoint
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={api_key}"
+    
     headers = {
-      "Authorization": f"Bearer {api_key}",
-      "Content-Type":  "application/json"
+        "Content-Type": "application/json"
     }
+    
     prompt = (
-      f"Write a one-sentence news teaser about a {event_type} "
-      f"incident at {location} in New York City."
+        f"Write a one-sentence news teaser about a {event_type} "
+        f"incident at {location} in New York City."
     )
+    
+    # Correct request body format for Gemini API
     body = {
-      "prompt": {"text": prompt},
-      "temperature": 0.7,
-      "candidate_count": 1
+        "contents": [{
+            "parts": [{
+                "text": prompt
+            }]
+        }],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 100
+        }
     }
 
-    resp = requests.post(url, headers=headers, json=body)
-    if resp.ok:
-        excerpt = resp.json()["candidates"][0]["content"]
-    else:
+    try:
+        resp = requests.post(url, headers=headers, json=body)
+        resp.raise_for_status()  # Raises an exception for bad status codes
+        
+        response_data = resp.json()
+        print("🔍 Gemini returned:", response_data)
+        
+        # Extract text from the correct response structure
+        excerpt = response_data["candidates"][0]["content"]["parts"][0]["text"]
+        
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Request error: {e}")
+        excerpt = "News unavailable due to network error."
+    except (KeyError, IndexError) as e:
+        print(f"❌ Response parsing error: {e}")
+        print("Full response:", resp.json() if 'resp' in locals() else "No response")
+        excerpt = "News unavailable due to parsing error."
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
         excerpt = "News unavailable."
 
-    return jsonify({ "excerpt": excerpt })
+    print("🔔 sending excerpt:", excerpt)
+    return jsonify({"excerpt": excerpt})
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Event Saving Logic
