@@ -1,182 +1,182 @@
 [
-    {
-      "type": "gunfire",
-      "location": "Times Square",
-      "lat": 40.758,
-      "lon": 73.9855
-    },
-    {
-      "type": "robbery",
-      "location": "Flatbush Avenue",
-      "lat": 40.65,
-      "lon": 73.95
-    },
-    {
-      "type": "gunfire",
-      "location": "Broadway",
-      "lat": 40.8130475,
-      "lon": -73.9600721
-    },
-    {
-      "type": "gunfire",
-      "location": "Broadway",
-      "lat": 40.8130475,
-      "lon": -73.9600721
-    },
-    {
-      "type": "gunfire",
-      "location": "Broadway",
-      "lat": 40.8130475,
-      "lon": -73.9600721
-    },
-    {
-      "type": "gunfire",
-      "location": "Broadway",
-      "lat": 40.8130475,
-      "lon": -73.9600721
-    },
-    {
-      "type": "gunfire",
-      "location": "Broadway",
-      "lat": 40.8130475,
-      "lon": -73.9600721
-    },
-    {
-      "type": "gunfire",
-      "location": "Broadway",
-      "lat": 40.8130475,
-      "lon": -73.9600721
-    },
-    {
-      "type": "gunfire",
-      "location": "Broadway",
-      "lat": 40.8130475,
-      "lon": -73.9600721
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    },
-    {
-      "type": "gunfire",
-      "location": "Multiple",
-      "lat": 42.4479311,
-      "lon": -78.8654528
-    }
-  ]
+  {
+    "type": "gunfire",
+    "location": "Times Square",
+    "lat": 40.758,
+    "lon": 73.9855
+  },
+  {
+    "type": "robbery",
+    "location": "Flatbush Avenue",
+    "lat": 40.65,
+    "lon": 73.95
+  },
+  {
+    "type": "gunfire",
+    "location": "Broadway",
+    "lat": 40.8130475,
+    "lon": -73.9600721
+  },
+  {
+    "type": "gunfire",
+    "location": "Broadway",
+    "lat": 40.8130475,
+    "lon": -73.9600721
+  },
+  {
+    "type": "gunfire",
+    "location": "Broadway",
+    "lat": 40.8130475,
+    "lon": -73.9600721
+  },
+  {
+    "type": "gunfire",
+    "location": "Broadway",
+    "lat": 40.8130475,
+    "lon": -73.9600721
+  },
+  {
+    "type": "gunfire",
+    "location": "Broadway",
+    "lat": 40.8130475,
+    "lon": -73.9600721
+  },
+  {
+    "type": "gunfire",
+    "location": "Broadway",
+    "lat": 40.8130475,
+    "lon": -73.9600721
+  },
+  {
+    "type": "gunfire",
+    "location": "Broadway",
+    "lat": 40.8130475,
+    "lon": -73.9600721
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  },
+  {
+    "type": "gunfire",
+    "location": "Multiple",
+    "lat": 42.4479311,
+    "lon": -78.8654528
+  }
+]
