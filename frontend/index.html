@@ -3,60 +3,88 @@
 <head>
   <title>NYC Danger Map</title>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Leaflet CSS & JS -->
-  <link 
-    rel="stylesheet" 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link
+    rel="stylesheet"
     href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-  <script 
+  <script
     src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script 
+  <script
     src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
   <style>
-    body { margin: 0; font-family: sans-serif; padding: 20px; }
-    h1 { text-align: center; margin-bottom: 10px; }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
 
+    /* FLEX CONTAINER FOR MAP + ALERTS */
+    #main {
+      display: flex;
+      gap: 20px;
+    }
+
+    /* YOUR MAP */
     #map {
+      flex: 1;
       height: 70vh;
-      width: 100%;
       border: 2px solid #ccc;
       border-radius: 8px;
     }
 
+    /* ALERT PANEL */
+    #alert-panel {
+      width: 300px;
+      height: 70vh;
+      overflow-y: auto;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      background: #f9f9f9;
+    }
+    .alert {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .alert h3 {
+      margin: 0;
+      font-size: 1em;
+      text-transform: capitalize;
+    }
+    .alert p {
+      margin: 4px 0;
+      font-size: 0.9em;
+    }
+
+    /* CONTROLS STAY ABOVE */
     #controls {
-      margin: 10px auto;
       text-align: center;
-    }
-
-    button {
-      padding: 8px 16px;
-      border: none;
-      background: #1976d2;
-      color: #fff;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    button:hover {
-      background: #125ea2;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
 
   <h1>NYC Danger Map</h1>
-
   <div id="controls">
     <button onclick="toggleHeat()">Toggle Heatmap</button>
   </div>
 
-  <div id="map"></div>
+  <div id="main">
+    <div id="map"></div>
+    <div id="alert-panel">
+      <h2>Incidents</h2>
+    </div>
+  </div>
 
   <script>
-    // Initialize map
+    // --- Leaflet + Heatmap Boilerplate ---
     const map = L.map('map').setView([40.7128, -74.0060], 12);
     L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
@@ -68,7 +96,6 @@
     ).addTo(map);
 
     let heatLayer = null;
-
     function loadHeat() {
       fetch('/events.json')
         .then(r => r.json())
@@ -77,20 +104,55 @@
           if (heatLayer) map.removeLayer(heatLayer);
           heatLayer = L.heatLayer(pts, {
             radius: 25,
-            blur: 15,
+            blur:   15,
             minOpacity: 0.4
           }).addTo(map);
         });
     }
-
     function toggleHeat() {
       if (!heatLayer) return;
       map.hasLayer(heatLayer)
         ? map.removeLayer(heatLayer)
         : map.addLayer(heatLayer);
     }
-
     loadHeat();
+
+    // --- NEW: build your scrollable alerts panel ---
+    function loadAlerts() {
+      fetch('/events.json')
+        .then(r => r.json())
+        .then(events => {
+          const panel = document.getElementById('alert-panel');
+          events.forEach(ev => {
+            const card = document.createElement('div');
+            card.className = 'alert';
+            card.innerHTML = `
+              <h3>${ev.type}</h3>
+              <p><strong>Location:</strong> ${ev.location}</p>
+              <p class="excerpt">Loading news…</p>
+            `;
+            panel.appendChild(card);
+
+            // call your new Flask /generate_news
+            fetch('/generate_news', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: ev.type,
+                location: ev.location
+              })
+            })
+            .then(r => r.json   ())
+            .then(js => {
+              card.querySelector('.excerpt').textContent = js.excerpt;
+            })
+            .catch(_ => {
+              card.querySelector('.excerpt').textContent = 'News unavailable.';
+            });
+          });
+        });
+    }
+    loadAlerts();
   </script>
 
 </body>
