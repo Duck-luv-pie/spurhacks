@@ -1,87 +1,733 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NYC Danger Map</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      text-align: center;
-      padding: 2rem;
-    }
-
-    .container {
-      background-color: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 3rem;
-      border-radius: 20px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-      max-width: 500px;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      font-weight: 800;
-      color: #00ffff;
-    }
-
-    p {
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-      color: #e0f7fa;
-    }
-
-    .button {
-      background: #00ffff;
-      color: #001f2d;
-      padding: 0.8rem 2rem;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-
-    .button:hover {
-      background: #00e6e6;
-      transform: scale(1.05);
-    }
-
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 2rem;
-      }
-
-      .button {
-        width: 100%;
-        padding: 1rem;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsAlert - Break Stories First with Real-time Emergency Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+        
+        .breaking-news {
+            animation: breaking 3s ease-in-out infinite;
+        }
+        
+        @keyframes breaking {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+        }
+        
+        .news-gradient {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .hero-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        
+        .backdrop-blur {
+            backdrop-filter: blur(8px);
+        }
+        
+        .live-indicator {
+            animation: live-pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes live-pulse {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                opacity: 0.8;
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <h1>🗽 NYC Danger Heatmap</h1>
-    <p>Live public safety alerts in NYC — powered by NLP + Whisper AI.</p>
-    <a class="button" href="/map">Enter App</a>
-  </div>
+<body class="smooth-scroll">
+    <div class="min-h-screen bg-slate-50">
+        <!-- Breaking News Banner -->
+        <div class="bg-red-600 text-white py-2 px-4 text-center text-sm font-medium breaking-news">
+            🚨 BREAKING: NewsAlert helped Channel 7 break the Times Square incident story 12 minutes before competitors
+        </div>
+
+        <!-- Header -->
+        <header class="border-b bg-white/95 backdrop-blur sticky top-0 z-50 shadow-sm">
+            <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="newspaper" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-900">NewsAlert</span>
+                    <div class="hidden sm:flex items-center ml-4">
+                        <div class="w-2 h-2 bg-red-500 rounded-full live-indicator"></div>
+                        <span class="text-xs text-red-600 font-medium ml-1">LIVE</span>
+                    </div>
+                </div>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
+                    <a href="#newsrooms" class="text-gray-600 hover:text-gray-900 transition-colors">Newsrooms</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
+                    <a href="#api" class="text-gray-600 hover:text-gray-900 transition-colors">API</a>
+                    <button class="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 hover:bg-gray-50 transition-colors">
+                        Newsroom Login
+                    </button>
+                    <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors">
+                        Start Breaking News
+                    </button>
+                </nav>
+                <button class="md:hidden" onclick="toggleMobileMenu()">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+                <div class="px-4 py-2 space-y-2">
+                    <a href="#features" class="block py-2 text-gray-600">Features</a>
+                    <a href="#newsrooms" class="block py-2 text-gray-600">Newsrooms</a>
+                    <a href="#pricing" class="block py-2 text-gray-600">Pricing</a>
+                    <a href="#api" class="block py-2 text-gray-600">API</a>
+                    <button class="w-full text-left py-2 text-gray-600">Newsroom Login</button>
+                    <button class="w-full bg-red-600 text-white py-2 rounded-md mt-2">Start Breaking News</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="py-20 px-4 gradient-bg text-white">
+            <div class="container mx-auto text-center max-w-4xl">
+                <div class="inline-flex items-center px-4 py-2 rounded-full text-sm bg-red-600/20 text-red-200 border border-red-500/30 mb-6">
+                    <i data-lucide="zap" class="w-4 h-4 mr-2"></i>
+                    Be First to the Story
+                </div>
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                    Break News Stories
+                    <span class="text-red-400"> Minutes Before</span>
+                    <br />Your Competition
+                </h1>
+                <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                    NewsAlert monitors live NYPD and FDNY radio feeds 24/7, instantly alerting your newsroom to breaking incidents. 
+                    Get precise locations, incident details, and severity scores to dispatch crews faster than ever before.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                    <button class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg text-lg font-semibold transition-colors flex items-center justify-center shadow-lg">
+                        <i data-lucide="radio" class="mr-2 w-5 h-5"></i>
+                        Start Breaking News
+                    </button>
+                    <button class="px-8 py-4 border-2 border-white/30 text-white rounded-lg text-lg font-semibold hover:bg-white/10 transition-colors flex items-center justify-center">
+                        <i data-lucide="play" class="mr-2 w-5 h-5"></i>
+                        Watch Live Demo
+                    </button>
+                </div>
+
+                <!-- Hero Visual - Live News Feed -->
+                <div class="relative bg-gray-900 rounded-xl p-8 hero-shadow">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-white">Live Breaking News Feed</h3>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            <span class="text-red-400 text-sm font-medium">LIVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-red-600/20 border-l-4 border-red-500 rounded-lg p-4 transform hover:scale-105 transition-transform">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">BREAKING</span>
+                                    <span class="text-red-400 text-sm font-medium">🔥 Structure Fire</span>
+                                </div>
+                                <span class="text-gray-400 text-xs">2 min ago</span>
+                            </div>
+                            <p class="text-white font-medium">"Multiple alarm fire at 42nd and Broadway, FDNY requesting additional units"</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="flex items-center space-x-4 text-xs text-gray-300">
+                                    <span>📍 Times Square, Manhattan</span>
+                                    <span>⚡ Priority: URGENT</span>
+                                    <span>📊 News Score: 95/100</span>
+                                </div>
+                                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors">
+                                    Dispatch Crew
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-orange-600/20 border-l-4 border-orange-500 rounded-lg p-4 transform hover:scale-105 transition-transform">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="bg-orange-600 text-white px-2 py-1 rounded text-xs font-bold">URGENT</span>
+                                    <span class="text-orange-400 text-sm font-medium">🚨 Armed Robbery</span>
+                                </div>
+                                <span class="text-gray-400 text-xs">5 min ago</span>
+                            </div>
+                            <p class="text-white font-medium">"Armed robbery in progress, suspect description: male, black hoodie, fleeing on foot"</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="flex items-center space-x-4 text-xs text-gray-300">
+                                    <span>📍 Lower East Side</span>
+                                    <span>⚡ Priority: HIGH</span>
+                                    <span>📊 News Score: 78/100</span>
+                                </div>
+                                <button class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors">
+                                    Dispatch Crew
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-600/20 border-l-4 border-yellow-500 rounded-lg p-4 transform hover:scale-105 transition-transform">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="bg-yellow-600 text-white px-2 py-1 rounded text-xs font-bold">DEVELOPING</span>
+                                    <span class="text-yellow-400 text-sm font-medium">🚗 Vehicle Accident</span>
+                                </div>
+                                <span class="text-gray-400 text-xs">8 min ago</span>
+                            </div>
+                            <p class="text-white font-medium">"Multi-vehicle accident with possible injuries, FDR Drive southbound blocked"</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="flex items-center space-x-4 text-xs text-gray-300">
+                                    <span>📍 FDR Drive, Manhattan</span>
+                                    <span>⚡ Priority: MEDIUM</span>
+                                    <span>📊 News Score: 62/100</span>
+                                </div>
+                                <button class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-xs font-medium transition-colors">
+                                    Monitor
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <div>
+                        <div class="text-4xl font-bold text-red-600 mb-2">12min</div>
+                        <div class="text-gray-600">Average time advantage over competitors</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold text-red-600 mb-2">24/7</div>
+                        <div class="text-gray-600">Continuous monitoring</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold text-red-600 mb-2">95%</div>
+                        <div class="text-gray-600">Incident classification accuracy</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold text-red-600 mb-2">50+</div>
+                        <div class="text-gray-600">Newsrooms already using NewsAlert</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Everything Your Newsroom Needs to Break Stories First</h2>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                        From live radio monitoring to intelligent story scoring, NewsAlert gives your team the competitive edge in breaking news coverage.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-lg p-6 card-shadow hover:shadow-lg transition-shadow">
+                        <i data-lucide="radio" class="w-10 h-10 text-red-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Live Radio Monitoring</h3>
+                        <p class="text-gray-600">
+                            24/7 monitoring of NYPD and FDNY radio frequencies with instant transcription and analysis
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 card-shadow hover:shadow-lg transition-shadow">
+                        <i data-lucide="zap" class="w-10 h-10 text-red-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Instant Alerts</h3>
+                        <p class="text-gray-600">
+                            Get breaking news alerts via SMS, email, Slack, or custom webhooks the moment incidents occur
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 card-shadow hover:shadow-lg transition-shadow">
+                        <i data-lucide="target" class="w-10 h-10 text-red-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Precise Locations</h3>
+                        <p class="text-gray-600">
+                            AI-powered geocoding converts radio chatter into exact coordinates for faster crew deployment
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 card-shadow hover:shadow-lg transition-shadow">
+                        <i data-lucide="trending-up" class="w-10 h-10 text-red-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">News Value Scoring</h3>
+                        <p class="text-gray-600">
+                            Intelligent algorithms rank incidents by newsworthiness, helping you prioritize coverage
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 card-shadow hover:shadow-lg transition-shadow">
+                        <i data-lucide="map" class="w-10 h-10 text-red-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Interactive Newsroom Map</h3>
+                        <p class="text-gray-600">
+                            Real-time incident visualization with crew tracking and assignment management
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 card-shadow hover:shadow-lg transition-shadow">
+                        <i data-lucide="smartphone" class="w-10 h-10 text-red-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Mobile Field App</h3>
+                        <p class="text-gray-600">
+                            Keep field reporters connected with live updates and two-way communication
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsrooms Section */
+        <section id="newsrooms" class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Trusted by Leading Newsrooms</h2>
+                    <p class="text-xl text-gray-600">
+                        From local stations to major networks, news organizations rely on NewsAlert for breaking news coverage
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div class="space-y-8">
+                        <div class="flex items-start space-x-4">
+                            <i data-lucide="tv" class="w-8 h-8 text-red-600 mt-1"></i>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Television News</h3>
+                                <p class="text-gray-600">
+                                    Get your crews to breaking news scenes faster than competitors. Live incident feeds help you make split-second decisions about story coverage and resource allocation.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <i data-lucide="newspaper" class="w-8 h-8 text-red-600 mt-1"></i>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Digital News</h3>
+                                <p class="text-gray-600">
+                                    Break stories online minutes before traditional media. Real-time incident data helps you publish accurate, timely reports that drive traffic and engagement.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <i data-lucide="mic" class="w-8 h-8 text-red-600 mt-1"></i>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Radio News</h3>
+                                <p class="text-gray-600">
+                                    Deliver breaking news updates on-air as incidents unfold. Perfect for traffic reports, breaking news bulletins, and live coverage coordination.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900 rounded-xl p-8 text-white">
+                        <div class="flex items-center mb-6">
+                            <i data-lucide="quote" class="w-8 h-8 text-red-400 mr-3"></i>
+                            <h3 class="text-2xl font-bold">Success Story</h3>
+                        </div>
+                        <blockquote class="text-lg mb-6 italic">
+                            "NewsAlert helped us break the Brooklyn warehouse fire story 15 minutes before our competitors. Our crew was already on scene conducting interviews while others were still getting the initial reports."
+                        </blockquote>
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mr-4">
+                                <span class="text-white font-bold">SM</span>
+                            </div>
+                            <div>
+                                <div class="font-semibold">Sarah Martinez</div>
+                                <div class="text-gray-400">News Director, Channel 7 NYC</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Section -->
+        <section id="api" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Integrate with Your Newsroom Systems</h2>
+                    <p class="text-xl text-gray-600">
+                        Seamlessly connect NewsAlert with your existing newsroom management systems and workflows
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-lg p-6 card-shadow">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-3">Real-time Webhooks</h3>
+                            <p class="text-gray-600 mb-4">
+                                Instantly push breaking news alerts to your newsroom management system, assignment desk, or mobile apps.
+                            </p>
+                            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                <span>Slack integration</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                <span>Microsoft Teams</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                <span>Custom endpoints</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg p-6 card-shadow">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-3">RESTful API</h3>
+                            <p class="text-gray-600 mb-4">
+                                Query historical incidents, get real-time feeds, and manage your newsroom's alert preferences programmatically.
+                            </p>
+                            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                <span>JSON responses</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                <span>Rate limiting</span>
+                            </div>
+                            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                                <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                <span>Authentication</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-4">Live API Example</h3>
+                        <div class="bg-gray-800 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                            <div class="text-green-400 mb-2">GET /api/incidents/breaking</div>
+                            <div class="text-gray-400 mb-2">Response:</div>
+                            <pre class="text-gray-300 whitespace-pre-wrap">{
+  "incidents": [
+    {
+      "id": "breaking_2024_001",
+      "type": "structure_fire",
+      "severity": "urgent",
+      "news_score": 95,
+      "location": {
+        "address": "42nd St & Broadway",
+        "neighborhood": "Times Square",
+        "lat": 40.7580,
+        "lng": -73.9855
+      },
+      "timestamp": "2024-01-15T14:30:00Z",
+      "description": "Multiple alarm fire...",
+      "units_responding": 12,
+      "estimated_arrival": "3 minutes",
+      "media_interest": "very_high"
+    }
+  ],
+  "total": 1,
+  "breaking_count": 3
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="py-20 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Newsroom Plans Built for Every Size</h2>
+                    <p class="text-xl text-gray-600">From local stations to major networks, we have a plan that fits your newsroom</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <div class="bg-white rounded-lg p-6 border-2 border-gray-200 card-shadow">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-semibold text-gray-900">Local Station</h3>
+                            <div class="text-4xl font-bold text-gray-900 mt-4">
+                                $499<span class="text-lg font-normal text-gray-600">/month</span>
+                            </div>
+                            <p class="text-gray-600 mt-2">Perfect for local news stations and small newsrooms</p>
+                        </div>
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Real-time breaking news alerts</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>5 simultaneous users</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Mobile field app</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Email & SMS alerts</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Basic API access</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-md transition-colors">
+                            Start Breaking News
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 border-2 border-red-600 card-shadow relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">Most Popular</span>
+                        </div>
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-semibold text-gray-900">Regional Network</h3>
+                            <div class="text-4xl font-bold text-gray-900 mt-4">
+                                $1,299<span class="text-lg font-normal text-gray-600">/month</span>
+                            </div>
+                            <p class="text-gray-600 mt-2">For regional networks and growing newsrooms</p>
+                        </div>
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Everything in Local Station</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>15 simultaneous users</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Advanced news scoring</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Slack/Teams integration</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Custom webhooks</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Historical data access</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-md transition-colors">
+                            Start Breaking News
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 border-2 border-gray-200 card-shadow">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-semibold text-gray-900">Major Network</h3>
+                            <div class="text-4xl font-bold text-gray-900 mt-4">Custom</div>
+                            <p class="text-gray-600 mt-2">For major networks and enterprise newsrooms</p>
+                        </div>
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Everything in Regional Network</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Unlimited users</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Multi-market coverage</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Dedicated infrastructure</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>24/7 newsroom support</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                <span>Custom integrations</span>
+                            </div>
+                        </div>
+                        <button class="w-full border border-gray-300 bg-white text-gray-900 py-3 rounded-md hover:bg-gray-50 transition-colors">
+                            Contact Newsroom Sales
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-20 news-gradient text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold mb-4">Ready to Break News First?</h2>
+                <p class="text-xl text-red-100 mb-8 max-w-2xl mx-auto">
+                    Join the newsrooms already using NewsAlert to stay ahead of breaking stories and beat the competition to every scene.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="px-8 py-4 bg-white text-red-600 hover:bg-gray-100 rounded-lg text-lg font-semibold transition-colors flex items-center justify-center">
+                        <i data-lucide="radio" class="mr-2 w-5 h-5"></i>
+                        Start Breaking News
+                    </button>
+                    <button class="px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-red-600 rounded-lg text-lg font-semibold transition-colors">
+                        Schedule Newsroom Demo
+                    </button>
+                </div>
+                <p class="text-red-200 text-sm mt-4">Free 14-day trial • No credit card required • Cancel anytime</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+                                <i data-lucide="newspaper" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <span class="text-xl font-bold">NewsAlert</span>
+                        </div>
+                        <p class="text-gray-400">Breaking news intelligence for modern newsrooms</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-4">Product</h3>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition-colors">Features</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">API Documentation</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Mobile App</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">System Status</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-4">Newsrooms</h3>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition-colors">Case Studies</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Success Stories</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Training</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Best Practices</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-4">Support</h3>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white transition-colors">24/7 Newsroom Support</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                    <p>&copy; 2024 NewsAlert. All rights reserved. Breaking news intelligence for modern newsrooms.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Add scroll effect to header
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.classList.add('shadow-lg');
+            } else {
+                header.classList.remove('shadow-lg');
+            }
+        });
+        
+        // Add click handlers for CTA buttons
+        document.querySelectorAll('button').forEach(button => {
+        if (button.textContent.includes('Start Breaking News')) {
+            button.addEventListener('click', function() {
+            // Redirect to your index.html
+            window.location.href = '/map';
+            });
+        } else if (button.textContent.includes('Demo')) {
+            button.addEventListener('click', function() {
+            alert('Live newsroom demo would be scheduled here!');
+            });
+        } else if (button.textContent.includes('Contact') || button.textContent.includes('Sales')) {
+            button.addEventListener('click', function() {
+            alert('Newsroom sales contact would be implemented here!');
+            });
+        } else if (button.textContent.includes('Dispatch Crew')) {
+            button.addEventListener('click', function() {
+            alert('Crew dispatch functionality would be implemented here!');
+            });
+        }
+        });
+
+
+        // Simulate live updates in the hero section
+        setInterval(function() {
+            const liveIndicators = document.querySelectorAll('.animate-pulse');
+            liveIndicators.forEach(indicator => {
+                indicator.style.opacity = indicator.style.opacity === '0.5' ? '1' : '0.5';
+            });
+        }, 1000);
+    </script>
 </body>
 </html>

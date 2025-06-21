@@ -12,24 +12,26 @@
   <script
     src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
-  <style>
+   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
+      font-family: 'Inter', sans-serif;
       padding: 20px;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
     }
+
     h1 {
       text-align: center;
       margin-bottom: 10px;
+      color: white;
     }
 
-    /* FLEX CONTAINER FOR MAP + ALERTS */
     #main {
       display: flex;
       gap: 20px;
     }
 
-    /* YOUR MAP */
     #map {
       flex: 1;
       height: 70vh;
@@ -37,32 +39,46 @@
       border-radius: 8px;
     }
 
-    /* ALERT PANEL */
     #alert-panel {
-      width: 300px;
-      height: 70vh;
-      overflow-y: auto;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      background: #f9f9f9;
-    }
-    .alert {
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #ddd;
-    }
-    .alert h3 {
-      margin: 0;
-      font-size: 1em;
-      text-transform: capitalize;
-    }
-    .alert p {
-      margin: 4px 0;
-      font-size: 0.9em;
-    }
+  width: 300px;
+  height: 70vh;
+  overflow-y: auto;
+  border: 2px solid rgba(0, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(0, 31, 45, 0.6);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
 
-    /* CONTROLS STAY ABOVE */
+.alert {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.alert:hover {
+  transform: scale(1.02);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.alert h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #00ffff;
+  text-transform: capitalize;
+}
+
+.alert p {
+  margin: 4px 0;
+  font-size: 0.9em;
+  color: #e0f7fa;
+}
+
     #controls {
       text-align: center;
       margin-bottom: 10px;
@@ -127,22 +143,31 @@
             const card = document.createElement('div');
             card.className = 'alert';
             card.innerHTML = `
-              <h3>${ev.type}</h3>
-              <p><strong>Location:</strong> ${ev.location}</p>
-              <p class="excerpt">Loading news…</p>
-            `;
+            <div class="alert-content">
+              <div class="text">
+                <h3>${ev.type}</h3>
+                <p><strong>Location:</strong> ${ev.location}</p>
+                <p class="excerpt">Loading news…</p>
+              </div>
+              <button class="dropdown-btn">⋮</button>
+            </div>
+          `;
+          const dropdownBtn = card.querySelector('.dropdown-btn');
+dropdownBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); // prevent card click
+  console.log("dropdown clicked");
+});
             card.style.cursor = 'pointer';           // show it’s clickable
-            card.addEventListener('click', () => {
-            // smooth “glide” to the event’s coords
-            // use flyTo for zoom+pan, or panTo for pan-only
+            card.addEventListener('click', (e) => {
+            // Ignore clicks on the dropdown button
+            if (e.target.closest('.dropdown-btn')) return;
+
             map.flyTo(
-                [ev.lat, ev.lon],
-                15,               // choose whatever zoom level you like
-                { duration: 1.2 } // seconds
+              [ev.lat, ev.lon],
+              15,
+              { duration: 1.2 }
             );
-            // if you’d rather keep the current zoom:
-            // map.flyTo([ev.lat, ev.lon], map.getZoom(), { duration: 1.2 });
-            });
+          });
             panel.appendChild(card);
 
             // call your new Flask /generate_news
