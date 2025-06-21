@@ -131,6 +131,18 @@
               <p><strong>Location:</strong> ${ev.location}</p>
               <p class="excerpt">Loading news…</p>
             `;
+            card.style.cursor = 'pointer';           // show it’s clickable
+            card.addEventListener('click', () => {
+            // smooth “glide” to the event’s coords
+            // use flyTo for zoom+pan, or panTo for pan-only
+            map.flyTo(
+                [ev.lat, ev.lon],
+                15,               // choose whatever zoom level you like
+                { duration: 1.2 } // seconds
+            );
+            // if you’d rather keep the current zoom:
+            // map.flyTo([ev.lat, ev.lon], map.getZoom(), { duration: 1.2 });
+            });
             panel.appendChild(card);
 
             // call your new Flask /generate_news

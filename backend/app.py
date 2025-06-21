@@ -12,6 +12,9 @@ from geolocate      import get_coordinates
 from dotenv import load_dotenv
 load_dotenv()   # reads .env into os.environ
 
+import time
+last_request_time = 0
+
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Paths
@@ -37,6 +40,8 @@ def generate_news():
     { type: "...", location: "..." }
     Returns JSON: { excerpt: "1-sentence teaser…" }
     """
+    global last_request_time  # Add this line to declare it as global
+    
     print("🔔 generate_news hit with:", request.get_json())
     data       = request.get_json()
     event_type = data.get("type")
@@ -68,7 +73,13 @@ def generate_news():
             "maxOutputTokens": 100
         }
     }
-
+    
+    # Rate limiting logic
+    current_time = time.time()
+    if current_time - last_request_time < 4.0:
+        time.sleep(1.0 - (current_time - last_request_time))
+    last_request_time = time.time()
+    
     try:
         resp = requests.post(url, headers=headers, json=body)
         resp.raise_for_status()  # Raises an exception for bad status codes
@@ -125,7 +136,9 @@ def run_listener():
         print("✅ Event saved:", evt)
 
     listen(on_txt, stop)
+
 print(app.url_map)
+
 # ───────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     threading.Thread(target=run_listener, daemon=True).start()
