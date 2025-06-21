@@ -106,6 +106,59 @@ def generate_news():
 
     print("🔔 sending excerpt:", excerpt)
     return jsonify({"excerpt": excerpt})
+@app.route("/generate_article", methods=["POST"])
+def generate_article():
+    """
+    Called by the frontend for each event:
+    { type: "...", location: "..." }
+    Returns JSON: { article: "full article text" }
+    """
+    global last_request_time
+
+    data       = request.get_json() or {}
+    event_type = data.get("type", "incident")
+    location   = data.get("location", "an unknown location")
+
+    api_key = os.getenv("GOOGLE_GEMINI_API_KEY")
+    url     = (
+        "https://generativelanguage.googleapis.com/"
+        "v1beta/models/gemini-1.5-flash-latest:generateContent"
+        f"?key={api_key}"
+    )
+
+    prompt = (
+        f"Write a captivating news‐style article about a {event_type} at {location} "
+        "in New York City. Use vivid details, quotes, and journalistic techniques, "
+        "and structure it like a real newsroom story with a headline, lead paragraph, "
+        "body, and conclusion."
+    )
+
+    body = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 512   # bump this up for a longer article
+        }
+    }
+
+    # simple rate-limit (shared with generate_news)
+    now = time.time()
+    if now - last_request_time < 4.0:
+        time.sleep(4.0 - (now - last_request_time))
+    last_request_time = time.time()
+
+    try:
+        resp = requests.post(url, headers={"Content-Type": "application/json"}, json=body)
+        resp.raise_for_status()
+        data = resp.json()
+        article = data["candidates"][0]["content"]["parts"][0]["text"]
+    except Exception as e:
+        print("❌ generate_article error:", e)
+        article = "Sorry, we couldn't generate the article right now."
+
+    return jsonify({"article": article})
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Event Saving Logic
@@ -146,4 +199,5 @@ print(app.url_map)
 if __name__ == "__main__":
     threading.Thread(target=run_listener, daemon=True).start()
     print("🐍 Starting Flask server…")
-    app.run(debug=True) 
+    # bind to 127.0.0.1:5001 instead of :5000
+    app.run(debug=True, host="127.0.0.1", port=5001)

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NYC Danger Map</title>
+  <title>NewsAlert - Live NYC Emergency Feed</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link
@@ -11,185 +11,1076 @@
     src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script
     src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border-color: rgba(148, 163, 184, 0.2);
+      --border-accent: rgba(220, 38, 38, 0.3);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --alert-bg: rgba(255, 255, 255, 0.8);
+      --alert-hover: rgba(248, 250, 252, 0.9);
+      --panel-bg: rgba(255, 255, 255, 0.95);
+      --control-bg: rgba(255, 255, 255, 0.9);
+      --control-hover: rgba(248, 250, 252, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+      --bg-secondary: #0f172a;
+      --bg-tertiary: #1e293b;
+      --text-primary: #ffffff;
+      --text-secondary: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-accent: rgba(220, 38, 38, 0.2);
+      --shadow-color: rgba(0, 0, 0, 0.4);
+      --alert-bg: rgba(15, 23, 42, 0.6);
+      --alert-hover: rgba(30, 41, 59, 0.8);
+      --panel-bg: rgba(15, 23, 42, 0.8);
+      --control-bg: rgba(255, 255, 255, 0.1);
+      --control-hover: rgba(255, 255, 255, 0.2);
+    }
+    
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
       padding: 20px;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: white;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] body {
+      background: var(--bg-primary);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 12px;
+      position: relative;
+    }
+
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      background: #dc2626;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 16px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: live-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes live-pulse {
+      0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+      }
+      50% {
+        opacity: 0.8;
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+      }
+    }
+
+    .live-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #ef4444;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      right: 0;
+      background: var(--control-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+    }
+
+    .theme-toggle:hover {
+      background: var(--control-hover);
+      transform: translateY(-1px);
+    }
+
+    #controls {
       text-align: center;
-      margin-bottom: 10px;
-      color: white;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .control-btn {
+      background: var(--control-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .control-btn:hover {
+      background: var(--control-hover);
+      transform: translateY(-1px);
     }
 
     #main {
       display: flex;
       gap: 20px;
+      height: calc(100vh - 140px);
     }
 
     #map {
       flex: 1;
-      height: 70vh;
-      border: 2px solid #ccc;
-      border-radius: 8px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px var(--shadow-color);
     }
 
     #alert-panel {
-  width: 300px;
-  height: 70vh;
-  overflow-y: auto;
-  border: 2px solid rgba(0, 255, 255, 0.2);
-  border-radius: 16px;
-  padding: 12px;
-  background: rgba(0, 31, 45, 0.6);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
+      width: 380px;
+      height: 100%;
+      overflow-y: auto;
+      border: 2px solid var(--border-accent);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px var(--shadow-color);
+    }
 
-.alert {
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 14px;
-  transition: transform 0.2s ease, background-color 0.3s ease;
-}
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
 
-.alert:hover {
-  transform: scale(1.02);
-  background-color: rgba(255, 255, 255, 0.12);
-}
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
 
-.alert h3 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #00ffff;
-  text-transform: capitalize;
-}
+    .incident-count {
+      background: #dc2626;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: auto;
+    }
 
-.alert p {
-  margin: 4px 0;
-  font-size: 0.9em;
-  color: #e0f7fa;
-}
+    /* Breaking News Alert Styles */
+    .alert {
+      background: var(--alert-bg);
+      border-left: 4px solid;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
 
-    #controls {
+    .alert:hover {
+      transform: translateY(-2px) scale(1.02);
+      background: var(--alert-hover);
+      box-shadow: 0 8px 25px var(--shadow-color);
+    }
+
+    .alert.expanded {
+      cursor: default;
+      transform: none;
+    }
+
+    .alert.expanded:hover {
+      transform: none;
+      scale: 1;
+    }
+
+    .alert.breaking {
+      border-left-color: #dc2626;
+      background: rgba(220, 38, 38, 0.1);
+      animation: breaking-glow 2s ease-in-out infinite;
+    }
+
+    .alert.urgent {
+      border-left-color: #ea580c;
+      background: rgba(234, 88, 12, 0.1);
+    }
+
+    .alert.developing {
+      border-left-color: #ca8a04;
+      background: rgba(202, 138, 4, 0.1);
+    }
+
+    .alert.monitoring {
+      border-left-color: #16a34a;
+      background: rgba(22, 163, 74, 0.1);
+    }
+
+    @keyframes breaking-glow {
+      0%, 100% {
+        box-shadow: 0 0 5px rgba(220, 38, 38, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+      }
+    }
+
+    .alert-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .alert-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .priority-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .priority-badge.breaking {
+      background: #dc2626;
+      color: white;
+    }
+
+    .priority-badge.urgent {
+      background: #ea580c;
+      color: white;
+    }
+
+    .priority-badge.developing {
+      background: #ca8a04;
+      color: white;
+    }
+
+    .priority-badge.monitoring {
+      background: #16a34a;
+      color: white;
+    }
+
+    .incident-type {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .timestamp {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 400;
+    }
+
+    .alert-description {
+      color: var(--text-primary);
+      font-weight: 500;
+      margin: 12px 0;
+      line-height: 1.4;
+    }
+
+    .alert-details {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .alert-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .news-score {
+      background: var(--control-bg);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .news-score:hover {
+      background: #dc2626;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    }
+
+    .news-score.loading {
+      background: #ca8a04;
+      color: white;
+      cursor: not-allowed;
+    }
+
+    .news-score.expanded {
+      background: #dc2626;
+      color: white;
+    }
+
+    .news-score.error {
+      background: #ef4444;
+      color: white;
+    }
+
+    /* Article Expansion Styles */
+    .article-container {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out;
+      margin-top: 0;
+      padding: 0;
+    }
+
+    .article-container.expanded {
+      max-height: 1000px;
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .article-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .article-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .close-article {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .close-article:hover {
+      background: var(--control-bg);
+      color: var(--text-primary);
+    }
+
+    .article-content {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 0.875rem;
+    }
+
+    .article-content h1, .article-content h2, .article-content h3 {
+      color: var(--text-primary);
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    .article-content h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .article-content h2 {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .article-content h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .article-content p {
+      margin-bottom: 12px;
+    }
+
+    .article-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: var(--text-muted);
+    }
+
+    .article-loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(220, 38, 38, 0.3);
+      border-top: 2px solid #dc2626;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    .error-message {
+      color: #ef4444;
       text-align: center;
-      margin-bottom: 10px;
+      padding: 20px;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 6px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .dispatch-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dispatch-btn:hover {
+      background: #b91c1c;
+      transform: translateY(-1px);
+    }
+
+    .dispatch-btn.urgent {
+      background: #ea580c;
+    }
+
+    .dispatch-btn.urgent:hover {
+      background: #c2410c;
+    }
+
+    .dispatch-btn.developing {
+      background: #ca8a04;
+    }
+
+    .dispatch-btn.developing:hover {
+      background: #a16207;
+    }
+
+    .dispatch-btn.monitoring {
+      background: #16a34a;
+    }
+
+    .dispatch-btn.monitoring:hover {
+      background: #15803d;
+    }
+
+    /* Scrollbar Styling */
+    #alert-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #alert-panel::-webkit-scrollbar-track {
+      background: var(--border-color);
+      border-radius: 3px;
+    }
+
+    #alert-panel::-webkit-scrollbar-thumb {
+      background: rgba(220, 38, 38, 0.6);
+      border-radius: 3px;
+    }
+
+    #alert-panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(220, 38, 38, 0.8);
+    }
+
+    /* Loading State */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(220, 38, 38, 0.3);
+      border-top: 2px solid #dc2626;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Light mode specific adjustments */
+    [data-theme="light"] .alert.breaking {
+      background: rgba(220, 38, 38, 0.05);
+      border-left-color: #dc2626;
+    }
+
+    [data-theme="light"] .alert.urgent {
+      background: rgba(234, 88, 12, 0.05);
+      border-left-color: #ea580c;
+    }
+
+    [data-theme="light"] .alert.developing {
+      background: rgba(202, 138, 4, 0.05);
+      border-left-color: #ca8a04;
+    }
+
+    [data-theme="light"] .alert.monitoring {
+      background: rgba(22, 163, 74, 0.05);
+      border-left-color: #16a34a;
     }
   </style>
 </head>
-<body>
+<body data-theme="light">
 
-  <h1>NYC Danger Map</h1>
+  <div class="header">
+    <div class="header-icon">
+      <i data-lucide="newspaper" style="width: 20px; height: 20px; color: white;"></i>
+    </div>
+    <h1>NewsAlert - Live NYC Emergency Feed</h1>
+    <div class="live-indicator">
+      <div class="live-dot"></div>
+      <span class="live-text">Live</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <i data-lucide="sun" id="theme-icon" style="width: 16px; height: 16px;"></i>
+      <span id="theme-text">Light</span>
+    </button>
+  </div>
+
   <div id="controls">
-    <button onclick="toggleHeat()">Toggle Heatmap</button>
+    <button class="control-btn" onclick="toggleHeat()">
+      <i data-lucide="thermometer" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+      Toggle Heatmap
+    </button>
+    <button class="control-btn" onclick="refreshFeed()">
+      <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+      Refresh Feed
+    </button>
   </div>
 
   <div id="main">
     <div id="map"></div>
     <div id="alert-panel">
-      <h2>Incidents</h2>
+      <div class="panel-header">
+        <h2 class="panel-title">Live Breaking News Feed</h2>
+        <div class="incident-count" id="incident-count">0</div>
+      </div>
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        Loading incidents...
+      </div>
     </div>
   </div>
 
   <script>
-    // --- Leaflet + Heatmap Boilerplate ---
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Theme management
+    let currentTheme = 'light';
+    let expandedArticle = null; // Track which article is currently expanded
+    
+    // Get the base URL for API calls
+    const API_BASE = window.location.origin;
+    
+    function toggleTheme() {
+      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', currentTheme);
+      
+      const themeIcon = document.getElementById('theme-icon');
+      const themeText = document.getElementById('theme-text');
+      
+      if (currentTheme === 'dark') {
+        themeIcon.setAttribute('data-lucide', 'moon');
+        themeText.textContent = 'Dark';
+      } else {
+        themeIcon.setAttribute('data-lucide', 'sun');
+        themeText.textContent = 'Light';
+      }
+      
+      // Reinitialize icons after changing
+      lucide.createIcons();
+      
+      // Update map tiles
+      updateMapTiles();
+      
+      // Save preference
+      localStorage.setItem('newsalert-theme', currentTheme);
+    }
+
+    // Load saved theme preference
+    function loadThemePreference() {
+      const savedTheme = localStorage.getItem('newsalert-theme');
+      if (savedTheme && savedTheme !== currentTheme) {
+        toggleTheme();
+      }
+    }
+
+    // --- Leaflet + Heatmap Setup ---
     const map = L.map('map').setView([40.7128, -74.0060], 12);
-    L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      {
-        attribution: '&copy; OpenStreetMap & CartoDB',
+    
+    let currentTileLayer = null;
+    
+    const tileLayerConfigs = {
+      light: {
+        url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        attribution: '&copy; OpenStreetMap & CartoDB'
+      },
+      dark: {
+        url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+        attribution: '&copy; OpenStreetMap & CartoDB'
+      }
+    };
+
+    function updateMapTiles() {
+      if (currentTileLayer) {
+        map.removeLayer(currentTileLayer);
+      }
+      
+      const config = tileLayerConfigs[currentTheme];
+      currentTileLayer = L.tileLayer(config.url, {
+        attribution: config.attribution,
         subdomains: 'abcd',
         maxZoom: 19
-      }
-    ).addTo(map);
+      }).addTo(map);
+    }
+
+    // Initialize with light tiles
+    updateMapTiles();
 
     let heatLayer = null;
+    let incidents = [];
+
     function loadHeat() {
-      fetch('/events.json')
-        .then(r => r.json())
+      fetch(`${API_BASE}/events.json`)
+        .then(r => {
+          if (!r.ok) {
+            throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+          }
+          return r.json();
+        })
         .then(data => {
           const pts = data.map(e => [e.lat, e.lon, 0.9]);
           if (heatLayer) map.removeLayer(heatLayer);
           heatLayer = L.heatLayer(pts, {
             radius: 25,
-            blur:   15,
-            minOpacity: 0.4
+            blur: 15,
+            minOpacity: 0.4,
+            gradient: {
+              0.0: '#000080',
+              0.2: '#0000FF', 
+              0.4: '#00FFFF',
+              0.6: '#00FF00',
+              0.8: '#FFFF00',
+              1.0: '#FF0000'
+            }
           }).addTo(map);
+        })
+        .catch(error => {
+          console.error('Error loading heatmap data:', error);
         });
     }
+
     function toggleHeat() {
       if (!heatLayer) return;
       map.hasLayer(heatLayer)
         ? map.removeLayer(heatLayer)
         : map.addLayer(heatLayer);
     }
-    loadHeat();
 
-    // --- NEW: build your scrollable alerts panel ---
-    function loadAlerts() {
-      fetch('/events.json')
-        .then(r => r.json())
-        .then(events => {
-          const panel = document.getElementById('alert-panel');
-          events.forEach(ev => {
-            const card = document.createElement('div');
-            card.className = 'alert';
-            card.innerHTML = `
-            <div class="alert-content">
-              <div class="text">
-                <h3>${ev.type}</h3>
-                <p><strong>Location:</strong> ${ev.location}</p>
-                <p class="excerpt">Loading news…</p>
-              </div>
-              <button class="dropdown-btn">⋮</button>
+    function refreshFeed() {
+      loadAlerts();
+      loadHeat();
+    }
+
+    // Incident type mapping and priority classification
+    function classifyIncident(type) {
+      const classifications = {
+        'fire': { priority: 'breaking', icon: '🔥', newsScore: 85 },
+        'structure_fire': { priority: 'breaking', icon: '🔥', newsScore: 95 },
+        'shooting': { priority: 'breaking', icon: '🚨', newsScore: 98 },
+        'robbery': { priority: 'urgent', icon: '🚨', newsScore: 78 },
+        'armed_robbery': { priority: 'urgent', icon: '🚨', newsScore: 85 },
+        'accident': { priority: 'developing', icon: '🚗', newsScore: 62 },
+        'vehicle_accident': { priority: 'developing', icon: '🚗', newsScore: 65 },
+        'medical': { priority: 'monitoring', icon: '🚑', newsScore: 45 },
+        'assault': { priority: 'urgent', icon: '⚠️', newsScore: 72 },
+        'burglary': { priority: 'developing', icon: '🏠', newsScore: 58 },
+        'domestic': { priority: 'monitoring', icon: '🏠', newsScore: 40 }
+      };
+
+      return classifications[type.toLowerCase()] || { 
+        priority: 'monitoring', 
+        icon: '📍', 
+        newsScore: 50 
+      };
+    }
+
+    function getTimeAgo(timestamp) {
+      const now = new Date();
+      const eventTime = new Date(timestamp || now - Math.random() * 600000); // Random time within last 10 min
+      const diffMs = now - eventTime;
+      const diffMins = Math.floor(diffMs / 60000);
+      
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins} min ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      return `${diffHours}h ${diffMins % 60}m ago`;
+    }
+
+    function generateNewsDescription(type, location) {
+      const templates = {
+        'fire': [
+          `Multiple alarm fire reported at ${location}, FDNY units responding`,
+          `Structure fire with heavy smoke visible at ${location}`,
+          `Fire department requesting additional units for incident at ${location}`
+        ],
+        'shooting': [
+          `Shots fired reported at ${location}, NYPD investigating`,
+          `Multiple units responding to shooting incident at ${location}`,
+          `Active investigation underway for shooting at ${location}`
+        ],
+        'robbery': [
+          `Armed robbery in progress at ${location}, suspect description pending`,
+          `Robbery reported at ${location}, units in pursuit`,
+          `Store robbery at ${location}, suspect fled on foot`
+        ],
+        'accident': [
+          `Multi-vehicle accident at ${location}, possible injuries`,
+          `Traffic accident blocking lanes at ${location}`,
+          `Vehicle collision at ${location}, emergency services responding`
+        ]
+      };
+
+      const typeTemplates = templates[type.toLowerCase()] || [
+        `Incident reported at ${location}, units responding`
+      ];
+      
+      return typeTemplates[Math.floor(Math.random() * typeTemplates.length)];
+    }
+
+    function toggleArticle(event, incident, cardElement) {
+      event.stopPropagation();
+      
+      const articleContainer = cardElement.querySelector('.article-container');
+      const newsScore = cardElement.querySelector('.news-score');
+      const isCurrentlyExpanded = articleContainer.classList.contains('expanded');
+      
+      // Close any currently expanded article
+      if (expandedArticle && expandedArticle !== cardElement) {
+        const prevContainer = expandedArticle.querySelector('.article-container');
+        const prevScore = expandedArticle.querySelector('.news-score');
+        const prevAlert = expandedArticle;
+        
+        prevContainer.classList.remove('expanded');
+        prevScore.classList.remove('expanded', 'loading', 'error');
+        const classification = classifyIncident(JSON.parse(prevScore.dataset.incident).type);
+        prevScore.textContent = `📊 News Score: ${classification.newsScore}/100`;
+        prevAlert.classList.remove('expanded');
+      }
+      
+      if (isCurrentlyExpanded) {
+        // Close current article
+        articleContainer.classList.remove('expanded');
+        newsScore.classList.remove('expanded', 'loading', 'error');
+        const classification = classifyIncident(incident.type);
+        newsScore.textContent = `📊 News Score: ${classification.newsScore}/100`;
+        cardElement.classList.remove('expanded');
+        expandedArticle = null;
+      } else {
+        // Open article
+        expandedArticle = cardElement;
+        cardElement.classList.add('expanded');
+        newsScore.classList.add('loading');
+        newsScore.classList.remove('error');
+        newsScore.textContent = '📊 Loading article...';
+        
+        // Show loading state
+        articleContainer.innerHTML = `
+          <div class="article-loading">
+            <div class="article-loading-spinner"></div>
+            Generating full article...
+          </div>
+        `;
+        articleContainer.classList.add('expanded');
+        
+        // Fetch article from backend with better error handling
+        fetch(`${API_BASE}/generate_article`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            type: incident.type,
+            location: incident.location
+          }),
+          credentials: 'same-origin' // Include credentials for same-origin requests
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const classification = classifyIncident(incident.type);
+          newsScore.classList.remove('loading');
+          newsScore.classList.add('expanded');
+          newsScore.textContent = `📊 News Score: ${classification.newsScore}/100 (Click to close)`;
+          
+          articleContainer.innerHTML = `
+            <div class="article-header">
+              <h3 class="article-title">
+                <i data-lucide="newspaper" style="width: 16px; height: 16px;"></i>
+                Full Article
+              </h3>
+              <button class="close-article" onclick="toggleArticle(event, ${JSON.stringify(incident).replace(/"/g, '&quot;')}, this.closest('.alert'))">
+                <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
+            <div class="article-content">${formatArticle(data.article)}</div>
+          `;
+          
+          // Reinitialize icons
+          lucide.createIcons();
+        })
+        .catch(error => {
+          console.error('Error loading article:', error);
+          newsScore.classList.remove('loading');
+          newsScore.classList.add('error');
+          newsScore.textContent = '📊 Article failed to load';
+          
+          let errorMessage = 'Failed to load article. ';
+          if (error.message.includes('Failed to fetch')) {
+            errorMessage += 'Please check if the server is running.';
+          } else if (error.message.includes('HTTP 404')) {
+            errorMessage += 'Article endpoint not found.';
+          } else if (error.message.includes('HTTP 500')) {
+            errorMessage += 'Server error occurred.';
+          } else {
+            errorMessage += 'Please try again later.';
+          }
+          
+          articleContainer.innerHTML = `
+            <div class="error-message">
+              <strong>Error:</strong> ${errorMessage}
+              <br><br>
+              <small>Error details: ${error.message}</small>
             </div>
           `;
-          const dropdownBtn = card.querySelector('.dropdown-btn');
-dropdownBtn.addEventListener('click', (e) => {
-  e.stopPropagation(); // prevent card click
-  console.log("dropdown clicked");
-});
-            card.style.cursor = 'pointer';           // show it’s clickable
-            card.addEventListener('click', (e) => {
-            // Ignore clicks on the dropdown button
-            if (e.target.closest('.dropdown-btn')) return;
+        });
+      }
+    }
 
-            map.flyTo(
-              [ev.lat, ev.lon],
-              15,
-              { duration: 1.2 }
-            );
+    function formatArticle(articleText) {
+      // Simple formatting to make the article look better
+      return articleText
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/^/, '<p>')
+        .replace(/$/, '</p>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    }
+
+    function createAlertCard(incident) {
+      const classification = classifyIncident(incident.type);
+      const timeAgo = getTimeAgo(incident.timestamp);
+      const description = generateNewsDescription(incident.type, incident.location);
+      
+      const card = document.createElement('div');
+      card.className = `alert ${classification.priority}`;
+      
+      card.innerHTML = `
+        <div class="alert-header">
+          <div class="alert-badges">
+            <span class="priority-badge ${classification.priority}">${classification.priority}</span>
+            <span class="incident-type">${classification.icon} ${incident.type.replace('_', ' ').toUpperCase()}</span>
+          </div>
+          <span class="timestamp">${timeAgo}</span>
+        </div>
+        <div class="alert-description">"${description}"</div>
+        <div class="alert-details">
+          <div class="alert-meta">
+            <span>📍 ${incident.location}</span>
+            <span>⚡ Priority: ${classification.priority.toUpperCase()}</span>
+            <span class="news-score" data-incident='${JSON.stringify(incident)}' onclick="toggleArticle(event, ${JSON.stringify(incident).replace(/"/g, '&quot;')}, this.closest('.alert'))">📊 News Score: ${classification.newsScore}/100</span>
+          </div>
+          <button class="dispatch-btn ${classification.priority}" onclick="dispatchCrew(event, '${incident.location}')">
+            Dispatch Crew
+          </button>
+        </div>
+        <div class="article-container"></div>
+      `;
+
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.dispatch-btn') || e.target.closest('.news-score') || e.target.closest('.article-container')) return;
+        
+        map.flyTo(
+          [incident.lat, incident.lon],
+          16,
+          { duration: 1.2 }
+        );
+        
+        // Add a temporary marker
+        const marker = L.marker([incident.lat, incident.lon])
+          .addTo(map)
+          .bindPopup(`
+            <div style="color: black;">
+              <strong>${incident.type.replace('_', ' ').toUpperCase()}</strong><br>
+              ${incident.location}<br>
+              <em>News Score: ${classification.newsScore}/100</em>
+            </div>
+          `)
+          .openPopup();
+        
+        setTimeout(() => {
+          map.removeLayer(marker);
+        }, 5000);
+      });
+
+      return card;
+    }
+
+    function dispatchCrew(event, location) {
+      event.stopPropagation();
+      alert(`Dispatching news crew to: ${location}\n\nCrew ETA: 8-12 minutes\nLive feed will begin upon arrival.`);
+    }
+
+    function loadAlerts() {
+      const panel = document.getElementById('alert-panel');
+      const loading = panel.querySelector('.loading');
+      
+      fetch(`${API_BASE}/events.json`)
+        .then(r => {
+          if (!r.ok) {
+            throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+          }
+          return r.json();
+        })
+        .then(events => {
+          // Clear existing alerts but keep header
+          const existingAlerts = panel.querySelectorAll('.alert');
+          existingAlerts.forEach(alert => alert.remove());
+          
+          if (loading) loading.remove();
+          
+          incidents = events;
+          expandedArticle = null; // Reset expanded state
+          
+          // Sort by priority and recency
+          const priorityOrder = { 'breaking': 4, 'urgent': 3, 'developing': 2, 'monitoring': 1 };
+          incidents.sort((a, b) => {
+            const aPriority = classifyIncident(a.type).priority;
+            const bPriority = classifyIncident(b.type).priority;
+            return priorityOrder[bPriority] - priorityOrder[aPriority];
           });
+
+          // Update incident count
+          document.getElementById('incident-count').textContent = incidents.length;
+
+          incidents.forEach(incident => {
+            const card = createAlertCard(incident);
             panel.appendChild(card);
-
-            // call your new Flask /generate_news
-            fetch('/generate_news', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                type: ev.type,
-                location: ev.location
-              })
-            })
-            .then(r => r.json   ())
-            .then(js => {
-              card.querySelector('.excerpt').textContent = js.excerpt;
-            })
-            .catch(_ => {
-              card.querySelector('.excerpt').textContent = 'News unavailable.';
-            });
           });
+        })
+        .catch(error => {
+          console.error('Error loading incidents:', error);
+          if (loading) {
+            loading.innerHTML = `<div class="error-message">Error loading incidents: ${error.message}<br><small>Please check if the server is running on ${API_BASE}</small></div>`;
+          }
         });
     }
+
+    // Initialize
+    loadThemePreference();
+    loadHeat();
     loadAlerts();
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+      refreshFeed();
+    }, 30000);
   </script>
 
 </body>
