@@ -15,9 +15,8 @@ load_dotenv()   # reads .env into os.environ
 import time
 last_request_time = 0
 
-
-# ───────────────────────────────────────────────────────────────────────────────
 # Paths
+# ───────────────────────────────────────────────────────────────────────────────
 BASE_DIR      = Path(__file__).resolve().parent
 FRONTEND_DIR  = BASE_DIR.parent / "frontend"
 EVENTS_FILE   = BASE_DIR / "events.json"
@@ -27,6 +26,10 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
+    return send_file(str(FRONTEND_DIR / "landing.html"))
+
+@app.route("/map")
+def map_view():
     return send_file(str(FRONTEND_DIR / "index.html"))
 
 @app.route("/events.json")
@@ -143,4 +146,4 @@ print(app.url_map)
 if __name__ == "__main__":
     threading.Thread(target=run_listener, daemon=True).start()
     print("🐍 Starting Flask server…")
-    app.run(debug=True)
+    app.run(debug=True) 
