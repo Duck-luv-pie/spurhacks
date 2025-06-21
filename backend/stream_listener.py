@@ -43,17 +43,17 @@ def listen(callback, stop_event: Event):
     test_path = "test.m4a"  # changed from .wav
 
     if not os.path.exists(test_path):
-        print(f"❌ Missing test file: {test_path}")
+        # print(f"❌ Missing test file: {test_path}")
         return
 
     print(f"🎧 Transcribing file: {test_path}")
     result = model.transcribe(test_path)
-    print("📝 Raw transcript:", result)
+    # print("📝 Raw transcript:", result)
     text = result.get("text", "").strip()
-    print(f"🧾 Final transcript: '{text}'")
+    # print(f"🧾 Final transcript: '{text}'")
 
     if text:
-        print(f"🗣️ Transcript: {text}")
+        # print(f"🗣️ Transcript: {text}")
         callback(text)
     else:
         print("⚠️ No transcription detected.")
