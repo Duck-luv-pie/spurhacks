@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NYC Danger Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS & JS -->
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+  <script 
+    src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script 
+    src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <style>
+    body { margin: 0; font-family: sans-serif; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 10px; }
+
+    #map {
+      height: 70vh;
+      width: 100%;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+
+    #controls {
+      margin: 10px auto;
+      text-align: center;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      background: #1976d2;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #125ea2;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>NYC Danger Map</h1>
+
+  <div id="controls">
+    <button onclick="toggleHeat()">Toggle Heatmap</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    // Initialize map
+    const map = L.map('map').setView([40.7128, -74.0060], 12);
+    L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      {
+        attribution: '&copy; OpenStreetMap & CartoDB',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }
+    ).addTo(map);
+
+    let heatLayer = null;
+
+    function loadHeat() {
+      fetch('/events.json')
+        .then(r => r.json())
+        .then(data => {
+          const pts = data.map(e => [e.lat, e.lon, 0.9]);
+          if (heatLayer) map.removeLayer(heatLayer);
+          heatLayer = L.heatLayer(pts, {
+            radius: 25,
+            blur: 15,
+            minOpacity: 0.4
+          }).addTo(map);
+        });
+    }
+
+    function toggleHeat() {
+      if (!heatLayer) return;
+      map.hasLayer(heatLayer)
+        ? map.removeLayer(heatLayer)
+        : map.addLayer(heatLayer);
+    }
+
+    loadHeat();
+  </script>
+
+</body>
+</html>
