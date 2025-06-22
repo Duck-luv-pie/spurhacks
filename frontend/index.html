@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NewsAlert - Live NYC Emergency Feed</title>
+  <title>NewsPulse - Live NYC Emergency Feed</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link
@@ -616,7 +616,7 @@
     <div class="header-icon">
       <i data-lucide="newspaper" style="width: 20px; height: 20px; color: white;"></i>
     </div>
-    <h1>NewsAlert - Live NYC Emergency Feed</h1>
+    <h1>NewsPulse - Live NYC Emergency Feed</h1>
     <div class="live-indicator">
       <div class="live-dot"></div>
       <span class="live-text">Live</span>
@@ -685,12 +685,12 @@
       updateMapTiles();
       
       // Save preference
-      localStorage.setItem('newsalert-theme', currentTheme);
+      localStorage.setItem('NewsPulse-theme', currentTheme);
     }
 
     // Load saved theme preference
     function loadThemePreference() {
-      const savedTheme = localStorage.getItem('newsalert-theme');
+      const savedTheme = localStorage.getItem('NewsPulse-theme');
       if (savedTheme && savedTheme !== currentTheme) {
         toggleTheme();
       }
@@ -798,7 +798,7 @@
 
     function getTimeAgo(timestamp) {
       const now = new Date();
-      const eventTime = new Date(timestamp || now - Math.random() * 600000); // Random time within last 10 min
+      const eventTime = new Date(timestamp || now - Math.random() * 600000); // Random time within last 10 min for now
       const diffMs = now - eventTime;
       const diffMins = Math.floor(diffMs / 60000);
       
