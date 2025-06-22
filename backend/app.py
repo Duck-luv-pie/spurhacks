@@ -4,6 +4,8 @@ from pathlib import Path
 from flask import Flask, send_file
 from flask import request, jsonify
 import os, requests
+import sqlite3
+from db_utils import insert_event
 
 from stream_listener import listen
 from nlp_parser     import extract_incident
@@ -23,6 +25,7 @@ EVENTS_FILE   = BASE_DIR / "events.json"
 
 # ───────────────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
+DB_PATH = "events.db"
 
 @app.route("/")
 def index():
@@ -33,8 +36,11 @@ def map_view():
     return send_file(str(FRONTEND_DIR / "index.html"))
 
 @app.route("/events.json")
-def serve_events():
-    return send_file(str(EVENTS_FILE))
+def get_events():
+    from db_utils import supabase
+    response = supabase.table("events").select("*").order("created_at", desc=True).limit(100).execute()
+    return jsonify(response.data)
+
 
 @app.route("/generate_news", methods=["POST"])
 def generate_news():
@@ -160,15 +166,29 @@ def generate_article():
 
     return jsonify({"article": article})
 
+
 # ───────────────────────────────────────────────────────────────────────────────
 # Event Saving Logic
+# def save_event(evt):
+#     with open(EVENTS_FILE, "r+") as f:
+#         try: arr = json.load(f)
+#         except: arr = []
+#         arr.append(evt)
+#         f.seek(0); f.truncate()
+#         json.dump(arr, f, indent=2)
 def save_event(evt):
-    with open(EVENTS_FILE, "r+") as f:
-        try: arr = json.load(f)
-        except: arr = []
-        arr.append(evt)
-        f.seek(0); f.truncate()
-        json.dump(arr, f, indent=2)
+    insert_event(evt["type"], evt["location"], evt["lat"], evt["lon"])
+
+# def save_event(evt):
+#     conn = sqlite3.connect(DB_PATH)
+#     cursor = conn.cursor()
+#     cursor.execute(
+#         "INSERT INTO events (type, location, lat, lon) VALUES (?, ?, ?, ?)",
+#         (evt["type"], evt["location"], evt["lat"], evt["lon"])
+#     )
+#     conn.commit()
+#     conn.close()
+
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Stream Listener Thread
