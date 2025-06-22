@@ -7,10 +7,15 @@
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
   <script
     src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script
     src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script 
+    src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
    <style>
@@ -171,6 +176,12 @@
     .control-btn:hover {
       background: var(--control-hover);
       transform: translateY(-1px);
+    }
+
+    .control-btn.active {
+      background: #dc2626;
+      color: white;
+      border-color: #dc2626;
     }
 
     #main {
@@ -545,6 +556,96 @@
       background: #15803d;
     }
 
+    .dispatch-btn.dispatched {
+      background: #059669;
+      cursor: default;
+    }
+
+    .dispatch-btn.dispatched:hover {
+      background: #059669;
+      transform: none;
+    }
+
+    /* Route Info Panel */
+    .route-info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: var(--panel-bg);
+      border: 2px solid var(--border-accent);
+      border-radius: 12px;
+      padding: 16px;
+      min-width: 280px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 24px var(--shadow-color);
+      z-index: 1000;
+      display: none;
+    }
+
+    .route-info.visible {
+      display: block;
+    }
+
+    .route-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .route-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .close-route {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .close-route:hover {
+      background: var(--control-bg);
+      color: var(--text-primary);
+    }
+
+    .route-details {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+
+    .route-stat {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .route-stat-label {
+      color: var(--text-muted);
+    }
+
+    .route-stat-value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Custom routing control styles */
+    .leaflet-routing-container {
+      display: none !important;
+    }
+
     /* Scrollbar Styling */
     #alert-panel::-webkit-scrollbar {
       width: 6px;
@@ -636,10 +737,41 @@
       <i data-lucide="refresh-cw" style="width: 16px; height: 16px; margin-right: 4px;"></i>
       Refresh Feed
     </button>
+    <button class="control-btn" id="clear-routes-btn" onclick="clearAllRoutes()" style="display: none;">
+      <i data-lucide="x-circle" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+      Clear Routes
+    </button>
   </div>
 
   <div id="main">
-    <div id="map"></div>
+    <div id="map">
+      <!-- Route Info Panel -->
+      <div id="route-info" class="route-info">
+        <div class="route-header">
+          <h3 class="route-title">
+            <i data-lucide="navigation" style="width: 16px; height: 16px;"></i>
+            Route to Incident
+          </h3>
+          <button class="close-route" onclick="clearAllRoutes()">
+            <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
+        <div class="route-details" id="route-details">
+          <div class="route-stat">
+            <span class="route-stat-label">Distance:</span>
+            <span class="route-stat-value" id="route-distance">--</span>
+          </div>
+          <div class="route-stat">
+            <span class="route-stat-label">ETA:</span>
+            <span class="route-stat-value" id="route-time">--</span>
+          </div>
+          <div class="route-stat">
+            <span class="route-stat-label">Destination:</span>
+            <span class="route-stat-value" id="route-destination">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="alert-panel">
       <div class="panel-header">
         <h2 class="panel-title">Live Breaking News Feed</h2>
@@ -662,6 +794,18 @@
     
     // Get the base URL for API calls
     const API_BASE = window.location.origin;
+    
+    // News Station Base Location (Times Square - typical news hub)
+    const NEWS_BASE = {
+      lat: 40.7580,
+      lng: -73.9855,
+      name: "NewsPulse HQ - Times Square"
+    };
+
+    // Routing variables
+    let currentRoute = null;
+    let baseMarker = null;
+    let destinationMarker = null;
     
     function toggleTheme() {
       currentTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -728,6 +872,30 @@
     // Initialize with light tiles
     updateMapTiles();
 
+    // Add base station marker
+    function addBaseMarker() {
+      if (baseMarker) {
+        map.removeLayer(baseMarker);
+      }
+      
+      const baseIcon = L.divIcon({
+        html: `<div style="background: #dc2626; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">📺</div>`,
+        className: 'base-marker',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+      
+      baseMarker = L.marker([NEWS_BASE.lat, NEWS_BASE.lng], { icon: baseIcon })
+        .addTo(map)
+        .bindPopup(`
+          <div style="color: black; text-align: center;">
+            <strong>📺 NewsPulse HQ</strong><br>
+            Times Square News Center<br>
+            <em>Base Station</em>
+          </div>
+        `);
+    }
+
     let heatLayer = null;
     let incidents = [];
 
@@ -771,6 +939,80 @@
     function refreshFeed() {
       loadAlerts();
       loadHeat();
+    }
+
+    // Route Management Functions
+    function showRoute(destinationLat, destinationLng, location) {
+      // Clear existing route
+      clearAllRoutes();
+      
+      // Create route
+      currentRoute = L.Routing.control({
+        waypoints: [
+          L.latLng(NEWS_BASE.lat, NEWS_BASE.lng),
+          L.latLng(destinationLat, destinationLng)
+        ],
+        routeWhileDragging: false,
+        addWaypoints: false,
+        createMarker: function() { return null; }, // We'll handle markers ourselves
+        lineOptions: {
+          styles: [
+            { color: '#dc2626', weight: 6, opacity: 0.8 },
+            { color: '#ffffff', weight: 2, opacity: 1 }
+          ]
+        }
+      }).on('routesfound', function(e) {
+        const routes = e.routes;
+        const summary = routes[0].summary;
+        
+        // Update route info panel
+        const distance = (summary.totalDistance / 1000).toFixed(1) + ' km';
+        const time = Math.round(summary.totalTime / 60) + ' min';
+        
+        document.getElementById('route-distance').textContent = distance;
+        document.getElementById('route-time').textContent = time;
+        document.getElementById('route-destination').textContent = location;
+        document.getElementById('route-info').classList.add('visible');
+        document.getElementById('clear-routes-btn').style.display = 'flex';
+        
+      }).addTo(map);
+
+      // Add destination marker
+      const destIcon = L.divIcon({
+        html: `<div style="background: #ef4444; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 12px rgba(0,0,0,0.4); animation: pulse 2s infinite;">🚨</div>`,
+        className: 'destination-marker',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+      
+      destinationMarker = L.marker([destinationLat, destinationLng], { icon: destIcon })
+        .addTo(map)
+        .bindPopup(`
+          <div style="color: black; text-align: center;">
+            <strong>🚨 Incident Location</strong><br>
+            ${location}<br>
+            <em>Crew Destination</em>
+          </div>
+        `);
+
+      // Fit map to show both points
+      const group = new L.featureGroup([baseMarker, destinationMarker]);
+      map.fitBounds(group.getBounds().pad(0.1));
+    }
+
+    function clearAllRoutes() {
+      if (currentRoute) {
+        map.removeControl(currentRoute);
+        currentRoute = null;
+      }
+      
+      if (destinationMarker) {
+        map.removeLayer(destinationMarker);
+        destinationMarker = null;
+      }
+      
+      document.getElementById('route-info').classList.remove('visible');
+      document.getElementById('clear-routes-btn').style.display = 'none';
     }
 
     // Incident type mapping and priority classification
@@ -986,7 +1228,7 @@
             <span>⚡ Priority: ${classification.priority.toUpperCase()}</span>
             <span class="news-score" data-incident='${JSON.stringify(incident)}' onclick="toggleArticle(event, ${JSON.stringify(incident).replace(/"/g, '&quot;')}, this.closest('.alert'))">📊 News Score: ${classification.newsScore}/100</span>
           </div>
-          <button class="dispatch-btn ${classification.priority}" onclick="dispatchCrew(event, '${incident.location}')">
+          <button class="dispatch-btn ${classification.priority}" onclick="dispatchCrew(event, ${incident.lat}, ${incident.lon}, '${incident.location}', this)">
             Dispatch Crew
           </button>
         </div>
@@ -1022,9 +1264,53 @@
       return card;
     }
 
-    function dispatchCrew(event, location) {
+    function dispatchCrew(event, lat, lon, location, buttonElement) {
       event.stopPropagation();
-      alert(`Dispatching news crew to: ${location}\n\nCrew ETA: 8-12 minutes\nLive feed will begin upon arrival.`);
+      
+      // Update button state
+      buttonElement.textContent = '✓ Crew Dispatched';
+      buttonElement.classList.add('dispatched');
+      buttonElement.disabled = true;
+      
+      // Show route on map
+      showRoute(lat, lon, location);
+      
+      // Show notification
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #059669;
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 10000;
+        font-family: Inter, sans-serif;
+        font-weight: 600;
+        animation: slideIn 0.3s ease-out;
+      `;
+      
+      notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>🚁</span>
+          <div>
+            <div>Crew dispatched to ${location}</div>
+            <div style="font-size: 0.875rem; opacity: 0.9; font-weight: 400;">Route displayed on map</div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Remove notification after 4 seconds
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-in forwards';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 4000);
     }
 
     function loadAlerts() {
@@ -1072,8 +1358,45 @@
         });
     }
 
+    // Add CSS animations for notifications
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
     // Initialize
     loadThemePreference();
+    addBaseMarker();
     loadHeat();
     loadAlerts();
 
